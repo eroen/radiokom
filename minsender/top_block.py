@@ -2,7 +2,7 @@
 ##################################################
 # Gnuradio Python Flow Graph
 # Title: Top Block
-# Generated: Tue Nov  9 14:07:23 2010
+# Generated: Wed Nov 10 16:24:02 2010
 ##################################################
 
 from gnuradio import blks2
@@ -10,6 +10,7 @@ from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio.eng_option import eng_option
 from gnuradio.gr import firdes
+from gnuradio.wxgui import constsink_gl
 from gnuradio.wxgui import forms
 from gnuradio.wxgui import scopesink2
 from grc_gnuradio import blks2 as grc_blks2
@@ -81,7 +82,7 @@ class top_block(grc_wxgui.top_block_gui):
 			log=False,
 		)
 		self.blks2_dxpsk_mod_0 = blks2.dbpsk_mod(
-			samples_per_symbol=2,
+			samples_per_symbol=4,
 			excess_bw=0.35,
 			gray_code=True,
 			verbose=False,
@@ -107,6 +108,22 @@ class top_block(grc_wxgui.top_block_gui):
 		self.gr_throttle_0_0 = gr.throttle(gr.sizeof_char*1, samp_rate/2)
 		self.gr_throttle_2 = gr.throttle(gr.sizeof_float*1, samp_rate/4/4)
 		self.gr_throttle_2_0 = gr.throttle(gr.sizeof_float*1, samp_rate/4/4)
+		self.wxgui_constellationsink2_1 = constsink_gl.const_sink_c(
+			self.GetWin(),
+			title="Constellation Plot",
+			sample_rate=samp_rate/2*2*8,
+			frame_rate=5,
+			const_size=2048,
+			M=4,
+			theta=0,
+			alpha=0.005,
+			fmax=0.06,
+			mu=0.5,
+			gain_mu=0.005,
+			symbol_rate=samp_rate/2*2*8/4,
+			omega_limit=0.005,
+		)
+		self.Add(self.wxgui_constellationsink2_1.win)
 		self.wxgui_scopesink2_1 = scopesink2.scope_sink_f(
 			self.n0.GetPage(1).GetWin(),
 			title="Scope Plot",
@@ -146,6 +163,7 @@ class top_block(grc_wxgui.top_block_gui):
 		self.connect((self.blks2_dxpsk_mod_0, 0), (self.blks2_dxpsk_demod_0, 0))
 		self.connect((self.gr_throttle_0, 0), (self.gr_char_to_float_1, 0))
 		self.connect((self.gr_char_to_float_1, 0), (self.wxgui_scopesink2_2, 0))
+		self.connect((self.blks2_dxpsk_mod_0, 0), (self.wxgui_constellationsink2_1, 0))
 
 	def set_tunefreq(self, tunefreq):
 		self.tunefreq = tunefreq
@@ -157,6 +175,7 @@ class top_block(grc_wxgui.top_block_gui):
 		self.wxgui_scopesink2_1.set_sample_rate(self.samp_rate/2/2)
 		self.gr_sig_source_x_0.set_sampling_freq(self.samp_rate/2/2)
 		self.wxgui_scopesink2_2.set_sample_rate(self.samp_rate)
+		self.wxgui_constellationsink2_1.set_sample_rate(self.samp_rate/2*2*8)
 
 if __name__ == '__main__':
 	parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
